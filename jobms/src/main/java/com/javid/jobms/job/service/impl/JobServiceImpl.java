@@ -14,10 +14,12 @@ import com.javid.jobms.job.repository.JobRepository;
 import com.javid.jobms.job.service.JobService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,10 +32,12 @@ public class JobServiceImpl implements JobService {
     private final ExternalCompanyService externalCompanyService;
     private final ExternalReviewService externalReviewService;
     private final JobMapper jobMapper;
+    private final CacheManager cacheManager;
 
 
     @Override
     @Cacheable(value = "allJobs")
+    @Transactional(readOnly = true)
     public List<GetJobResponse> findAll() {
         log.info("find all jobs method started");
         List<Job> jobs = jobRepository.findAll();
@@ -47,6 +51,7 @@ public class JobServiceImpl implements JobService {
     @Override
     @CacheEvict(value = "allJobs", allEntries = true)
     public boolean createJob(CreateJobRequest jobRequest) {
+
         if(jobRequest != null && jobRequest.companyId() != null) {
             Long companyId = jobRequest.companyId();
             boolean existsCompany = externalCompanyService.existsCompanyForReview(companyId);
@@ -109,5 +114,13 @@ public class JobServiceImpl implements JobService {
         GetAllReviewsForJobService reviews = externalReviewService.getReviews(job.getCompanyId());
 
         return jobMapper.mapToJobDTO(job, company, reviews);
+    }
+
+    private void evictCacheAfterCommit(){
+
+    }
+
+    private void clearCaches(){
+
     }
 }
