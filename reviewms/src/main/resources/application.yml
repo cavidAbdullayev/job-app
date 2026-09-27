@@ -1,0 +1,82 @@
+server:
+  port: 8083
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/review
+    username: javid
+    password: 12345
+  application:
+    name: review-service
+
+  jpa:
+    database: POSTGRESQL
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: myuser
+    password: mypassword
+    listener:
+      simple:
+        retry:
+          enabled: true
+          max-attempts: 3        # Maksimum 3 dəfə cəhd et
+          initial-interval: 2000ms # Cəhdlər arası 2 saniyə gözlə
+          multiplier: 2          # Hər dəfə gözləmə vaxtını 2 dəfə artır
+        default-requeue-rejected: false # Limit bitdikdə mesajı yenidən eyni növbəyə atma (DLQ-ya at və ya sil)
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+
+  instance:
+    hostname: localhost
+    prefer-ip-address: false
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  health:
+    circuitbreakers:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
+
+
+resilience4j:
+  retry:
+    retry-aspect-order: 2
+    instances:
+      companyRetry:
+        max-attempts: 5
+        wait-duration: 500ms
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+
+  circuitbreaker:
+    circuit-breaker-aspect-order: 1
+    instances:
+      companyBreaker:
+        register-health-indicator: true
+        sliding-window-size: 10
+        minimum-number-of-calls: 2
+        permitted-number-of-calls-in-half-open-state: 3
+        wait-duration-in-open-state: 10s
+        failure-rate-threshold: 50
+        automatic-transition-from-open-to-half-open-enabled: true
+        sliding-window-type: count_based
+
