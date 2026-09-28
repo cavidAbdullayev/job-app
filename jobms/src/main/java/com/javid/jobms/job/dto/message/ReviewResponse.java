@@ -1,4 +1,4 @@
-package com.javid.jobms.job.dto;
+package com.javid.jobms.job.dto.message;
 
 import lombok.Builder;
 

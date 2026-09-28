@@ -1,6 +1,8 @@
 package com.javid.jobms.job.mapper;
 
 import com.javid.jobms.job.dto.*;
+import com.javid.jobms.job.dto.message.CompanyResponse;
+import com.javid.jobms.job.dto.message.ReviewResponse;
 import com.javid.jobms.job.entity.Job;
 import com.javid.jobms.job.external.dto.Company;
 import com.javid.jobms.job.external.dto.GetAllReviewsForJobService;
@@ -48,6 +50,18 @@ public class JobMapperImpl implements JobMapper {
             job.setMaxSalary(updatedJob.maxSalary());
         if (updatedJob.location() != null)
             job.setLocation(updatedJob.location());
+    }
+
+    @Override
+    public SimpleJobResponse mapToSimpleJobResponse(Job job) {
+        return SimpleJobResponse.builder()
+                .title(job.getTitle())
+                .minSalary(job.getMinSalary())
+                .companyId(job.getCompanyId())
+                .maxSalary(job.getMaxSalary())
+                .description(job.getDescription())
+                .location(job.getLocation())
+                .build();
     }
 
     private static CompanyResponse mapToCompanyResponse(Company company) {

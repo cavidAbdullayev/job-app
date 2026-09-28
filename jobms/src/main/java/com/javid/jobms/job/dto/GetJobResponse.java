@@ -1,5 +1,7 @@
 package com.javid.jobms.job.dto;
 
+import com.javid.jobms.job.dto.message.CompanyResponse;
+import com.javid.jobms.job.dto.message.ReviewResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

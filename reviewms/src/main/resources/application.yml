@@ -79,4 +79,7 @@ resilience4j:
         failure-rate-threshold: 50
         automatic-transition-from-open-to-half-open-enabled: true
         sliding-window-type: count_based
+        ignore-exceptions:
+          - com.javid.reviewms.review.exception.CompanyNotFoundException
+          - com.javid.reviewms.review.exception.RemoteServiceException
 

@@ -30,7 +30,7 @@ public class CompanyController {
             value = "/{id}"
     )
     public ResponseEntity<GetCompanyResponse> updateCompany(@RequestBody @Valid UpdateCompanyRequest updatedCompany,
-                                                            @PathVariable("id") Long id) {
+                                                            @PathVariable Long id) {
         return ResponseEntity.ok(companyService.updateCompany(updatedCompany, id));
     }
 
@@ -43,7 +43,7 @@ public class CompanyController {
             method = RequestMethod.DELETE,
             value = "/{id}"
     )
-    public ResponseEntity<Void> deleteCompanyById(@PathVariable("id") Long id) {
+    public ResponseEntity<Void> deleteCompanyById(@PathVariable Long id) {
         companyService.deleteCompanyById(id);
         return ResponseEntity.noContent().build();
     }
@@ -52,7 +52,7 @@ public class CompanyController {
             method = RequestMethod.GET,
             value = "/{id}"
     )
-    public ResponseEntity<GetCompanyResponse> getCompanyById(@PathVariable("id") Long id) {
+    public ResponseEntity<GetCompanyResponse> getCompanyById(@PathVariable Long id) {
         GetCompanyResponse companyResponse = companyService.getCompanyById(id);
         if (companyResponse != null)
             return new ResponseEntity<>(companyResponse, HttpStatus.OK);

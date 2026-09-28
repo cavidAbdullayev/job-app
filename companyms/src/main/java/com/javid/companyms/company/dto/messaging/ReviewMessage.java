@@ -3,7 +3,6 @@ package com.javid.companyms.company.dto.messaging;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 
 public record ReviewMessage(
         @NotNull(message = "Average rating is required")

@@ -5,6 +5,7 @@ import com.javid.reviewms.review.dto.CreateReviewRequestDto;
 import com.javid.reviewms.review.dto.GetAllReviewsByCompanyIdResponseDto;
 import com.javid.reviewms.review.dto.GetReviewResponse;
 import com.javid.reviewms.review.dto.UpdateReviewRequestDto;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,14 +26,10 @@ public class ReviewControllerExternal {
     }
 
     @PostMapping
-    public ResponseEntity<String> addReview(@RequestParam Long companyId,
-                                            @RequestBody CreateReviewRequestDto reviewDto
+    public ResponseEntity<GetReviewResponse> addReview(@RequestParam Long companyId,
+                                            @RequestBody @Valid CreateReviewRequestDto reviewDto
     ) {
-        boolean isCreated = reviewService.addReview(companyId, reviewDto);
-        if (isCreated)
-            return new ResponseEntity<>("Review added successfully", HttpStatus.OK);
-
-        return new ResponseEntity<>("Review not saved", HttpStatus.NOT_FOUND);
+        return ResponseEntity.ok(reviewService.addReview(companyId, reviewDto));
     }
 
     @GetMapping("/{reviewId}")
@@ -47,25 +44,16 @@ public class ReviewControllerExternal {
     }
 
     @PutMapping("/{reviewId}")
-    public ResponseEntity<String> updateReview(@PathVariable Long reviewId,
-                                               @RequestBody UpdateReviewRequestDto updatedReview) {
+    public ResponseEntity<GetReviewResponse> updateReview(@PathVariable Long reviewId,
+                                               @RequestBody @Valid UpdateReviewRequestDto updatedReview) {
 
-        boolean isSaved = reviewService.updateReview(reviewId, updatedReview);
-        if (isSaved)
-            return new ResponseEntity<>("Review updated successfully", HttpStatus.OK);
-
-        return new ResponseEntity<>("Review not updated", HttpStatus.NOT_FOUND);
+        return ResponseEntity.ok(reviewService.updateReview(reviewId, updatedReview));
     }
 
     @DeleteMapping("/{reviewId}")
-    public ResponseEntity<String> deleteReview(@PathVariable Long reviewId) {
-        boolean isReviewDeleted = reviewService.deleteReview(reviewId);
-
-        if (isReviewDeleted)
-            return new ResponseEntity<>("Review deleted successfully", HttpStatus.OK);
-
-        return new ResponseEntity<>("Review not deleted", HttpStatus.NOT_FOUND);
-
+    public ResponseEntity<Void> deleteReview(@PathVariable Long reviewId) {
+        reviewService.deleteReview(reviewId);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/averageRating")

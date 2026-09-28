@@ -89,11 +89,6 @@ public class CompanyServiceImpl implements CompanyService {
     @Override
     @Transactional
     public void deleteCompanyById(Long id) {
-        if (id == null) {
-            log.error("Failed to delete company: ID is required");
-            throw new InvalidInputException("ID is required!");
-        }
-
         log.info("Deleting company with ID: {}", id);
         Company company = companyRepository.findById(id)
                 .orElseThrow(() -> {
@@ -110,11 +105,6 @@ public class CompanyServiceImpl implements CompanyService {
     @Transactional(readOnly = true)
     @Cacheable(value = "companies", key = "#id", unless = "#result == null")
     public GetCompanyResponse getCompanyById(Long id) {
-        if (id == null) {
-            log.error("Failed to fetch company: ID is required");
-            throw new InvalidInputException("ID is required!");
-        }
-
         log.info("Fetching company with ID: {}", id);
 
         Company company = companyRepository.findById(id)
@@ -152,11 +142,6 @@ public class CompanyServiceImpl implements CompanyService {
     @Override
     @Transactional(readOnly = true)
     public GetCompanyResponseForReview getCompanyResponseForReview(Long companyId) {
-        if (companyId == null) {
-            log.warn("Requested review company response with null ID");
-            return null;
-        }
-
         log.info("Fetching company response for review with company ID: {}", companyId);
         return companyRepository.getCompanyResponseForReview(companyId)
                 .orElseThrow(() -> {
@@ -168,11 +153,6 @@ public class CompanyServiceImpl implements CompanyService {
     @Override
     @Transactional(readOnly = true)
     public boolean existsCompanyForReview(Long companyId) {
-        if (companyId == null) {
-            log.warn("Checked company existence for review with null ID");
-            return false;
-        }
-
         log.debug("Checking existence of company ID: {} for review", companyId);
         return companyRepository.existsById(companyId);
     }

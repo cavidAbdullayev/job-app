@@ -11,10 +11,10 @@ import java.util.List;
 
 public interface ReviewService {
     GetAllReviewsByCompanyIdResponseDto getAllReviews(Long companyId);
-    boolean addReview(Long companyId, CreateReviewRequestDto reviewDto);
+    GetReviewResponse addReview(Long companyId, CreateReviewRequestDto reviewDto);
     GetReviewResponse getReview(Long reviewId);
-    boolean updateReview(Long reviewId, UpdateReviewRequestDto updatedReview);
+    GetReviewResponse updateReview(Long reviewId, UpdateReviewRequestDto updatedReview);
 
-    boolean deleteReview(Long reviewId);
+    void deleteReview(Long reviewId);
     GetAllReviewsForJobService getAllReviewsForJobService(Long companyId);
 }

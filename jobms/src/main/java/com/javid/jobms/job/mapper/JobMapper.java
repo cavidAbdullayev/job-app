@@ -2,6 +2,7 @@ package com.javid.jobms.job.mapper;
 
 import com.javid.jobms.job.dto.CreateJobRequest;
 import com.javid.jobms.job.dto.GetJobResponse;
+import com.javid.jobms.job.dto.SimpleJobResponse;
 import com.javid.jobms.job.dto.UpdateJobRequest;
 import com.javid.jobms.job.entity.Job;
 import com.javid.jobms.job.external.dto.Company;
@@ -14,4 +15,5 @@ public interface JobMapper {
 
     Job mapFromCreateRequest(CreateJobRequest createJobRequest);
     void mapForUpdate(Job job, UpdateJobRequest updatedJob);
+    SimpleJobResponse mapToSimpleJobResponse(Job job);
 }
