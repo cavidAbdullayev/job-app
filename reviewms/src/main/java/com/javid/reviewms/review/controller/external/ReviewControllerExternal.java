@@ -27,15 +27,15 @@ public class ReviewControllerExternal {
 
     @PostMapping
     public ResponseEntity<GetReviewResponse> addReview(@RequestParam Long companyId,
-                                            @RequestBody @Valid CreateReviewRequestDto reviewDto
+                                                       @RequestBody @Valid CreateReviewRequestDto reviewDto
     ) {
-        return ResponseEntity.ok(reviewService.addReview(companyId, reviewDto));
+        return new ResponseEntity<>(reviewService.addReview(companyId, reviewDto), HttpStatus.CREATED);
     }
 
     @GetMapping("/{reviewId}")
     public ResponseEntity<GetReviewResponse> getReview(@PathVariable Long reviewId) {
         GetReviewResponse reviewResponse = reviewService.getReview(reviewId);
-        if(reviewResponse != null)
+        if (reviewResponse != null)
             return new ResponseEntity<>(
                     reviewResponse,
                     HttpStatus.OK
@@ -45,9 +45,9 @@ public class ReviewControllerExternal {
 
     @PutMapping("/{reviewId}")
     public ResponseEntity<GetReviewResponse> updateReview(@PathVariable Long reviewId,
-                                               @RequestBody @Valid UpdateReviewRequestDto updatedReview) {
+                                                          @RequestBody @Valid UpdateReviewRequestDto updatedReview) {
 
-        return ResponseEntity.ok(reviewService.updateReview(reviewId, updatedReview));
+        return new ResponseEntity<>(reviewService.updateReview(reviewId, updatedReview), HttpStatus.OK);
     }
 
     @DeleteMapping("/{reviewId}")
@@ -57,14 +57,8 @@ public class ReviewControllerExternal {
     }
 
     @GetMapping("/averageRating")
-    public Double getAverageReview(@RequestParam Long companyId){
-        return reviewService
-                .getAllReviews(companyId)
-                .reviewResponses()
-                .stream()
-                .mapToDouble(GetReviewResponse::rating)
-                .average()
-                .orElse(0.0);
+    public ResponseEntity<Double> getAverageRating(@RequestParam Long companyId) {
+        return new ResponseEntity<>(reviewService.getAverageRating(companyId), HttpStatus.OK);
     }
 
 }

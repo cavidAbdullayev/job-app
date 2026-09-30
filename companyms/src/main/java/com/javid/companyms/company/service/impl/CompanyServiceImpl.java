@@ -181,12 +181,12 @@ public class CompanyServiceImpl implements CompanyService {
                 companiesCache.evict(companyId);
                 log.debug("Evicted 'companies' cache entry for ID: {}", companyId);
             }
+        }
 
             Cache allCompaniesCache = cacheManager.getCache("allCompanies");
             if (allCompaniesCache != null) {
                 allCompaniesCache.clear();
                 log.debug("Cleared 'allCompanies' cache");
             }
-        }
     }
 }

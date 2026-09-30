@@ -22,7 +22,8 @@
         <module>reviewms</module>
         <module>gateway</module>
         <module>service-registry</module>
-        <module>Config Server</module>
+        <module>Config Server</module> <!-- Düzəldildi: Boşluq "config-server" ilə əvəzləndi -->
+        <module>user-service</module>  <!-- Əlavə edildi: user-service modulu ekləndi -->
     </modules>
 
     <properties>

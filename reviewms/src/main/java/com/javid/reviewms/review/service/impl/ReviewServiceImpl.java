@@ -39,13 +39,18 @@ public class ReviewServiceImpl implements ReviewService {
 
 
     @Override
-    @Cacheable(value = "allReviews", key = "#companyId")
+    @Cacheable(value = "allReviews", key = "#companyId", unless = "#result == null")
     @Transactional(readOnly = true)
     public GetAllReviewsByCompanyIdResponseDto getAllReviews(Long companyId) {
         GetCompanyResponseForReview company = externalCompanyService.getCompanyResponseForReview(companyId);
-        Double companyRating = reviewRepository.getAvgRatingByCompanyId(companyId);
 
         List<Review> reviews = reviewRepository.findByCompanyId(companyId);
+        Double companyRating = reviews.stream()
+                .mapToDouble(Review::getRating)
+                .average()
+                .orElse(0.0);
+
+
         List<GetReviewResponse> reviewResponses = reviews.stream().map(reviewMapper::mapToResponse).toList();
 
         return GetAllReviewsByCompanyIdResponseDto.builder()
@@ -64,20 +69,22 @@ public class ReviewServiceImpl implements ReviewService {
         review.setCompanyId(companyId);
 
         reviewRepository.save(review);
+
+        evictCacheAfterCommit(null, companyId);
         //TODO: will be outbox
         reviewMessageProducer.sendMessage(companyId);
-        evictCacheAfterCommit(review.getId());
 
         return reviewMapper.mapToResponse(review);
     }
 
     @Override
-    @Cacheable(value = "reviews", key = "#reviewId")
+    @Cacheable(value = "reviews", key = "#reviewId", unless = "#result == null")
     @Transactional(readOnly = true)
     public GetReviewResponse getReview(Long reviewId) {
-        if (reviewRepository.existsById(reviewId))
-            return reviewMapper.mapToResponse(reviewRepository.findById(reviewId).orElse(null));
-        return null;
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ReviewNotFoundException("Review given ID-" + reviewId + " not found!"));
+
+        return reviewMapper.mapToResponse(review);
     }
 
     @Override
@@ -89,7 +96,8 @@ public class ReviewServiceImpl implements ReviewService {
         reviewMapper.mapForUpdateRequest(review, updatedReview);
         reviewRepository.save(review);
 
-        evictCacheAfterCommit(reviewId);
+        evictCacheAfterCommit(reviewId, review.getCompanyId());
+
         //TODO: will be outbox
         reviewMessageProducer.sendMessage(review.getCompanyId());
 
@@ -103,7 +111,7 @@ public class ReviewServiceImpl implements ReviewService {
                 new ReviewNotFoundException("Review given by ID-" + reviewId + " not found!"));
 
         reviewRepository.delete(review);
-        evictCacheAfterCommit(reviewId);
+        evictCacheAfterCommit(reviewId, review.getCompanyId());
 
         //TODO: will be outbox
         reviewMessageProducer.sendMessage(review.getCompanyId());
@@ -115,39 +123,49 @@ public class ReviewServiceImpl implements ReviewService {
         return reviewMapper.mapToGetAllReviewsForJobService(reviews);
     }
 
+    @Override
+    public Double getAverageRating(Long companyId) {
+        return reviewRepository.findByCompanyId(companyId)
+                .stream()
+                .mapToDouble(Review::getRating)
+                .average()
+                .orElse(0.0);
+    }
+
     private void checkCompanyExists(Long companyId) {
         if (!externalCompanyService.existsCompanyForReview(companyId))
             throw new CompanyNotFoundException("Company given by ID-" + companyId + " not found!");
     }
 
-    private void evictCacheAfterCommit(Long reviewId) {
+    private void evictCacheAfterCommit(Long reviewId, Long companyId) {
         if (TransactionSynchronizationManager.isActualTransactionActive()) {
             TransactionSynchronizationManager.registerSynchronization(
                     new TransactionSynchronization() {
                         @Override
                         public void afterCommit() {
                             log.info("Transaction committed successfully. Clearing caches for company ID: {}", reviewId);
-                            clearCaches(reviewId);
+                            clearCaches(reviewId, companyId);
                         }
                     }
             );
         } else {
             log.info("No active transaction found. Direct cache clearing for company ID: {}", reviewId);
-            clearCaches(reviewId);
+            clearCaches(reviewId, companyId);
         }
     }
 
-    private void clearCaches(Long reviewId) {
+    private void clearCaches(Long reviewId, Long companyId) {
         if (reviewId != null) {
             Cache reviewsCache = cacheManager.getCache("reviews");
             if (reviewsCache != null) {
                 reviewsCache.evict(reviewId);
                 log.debug("Evicted 'reviews' cache entry for ID: {}", reviewId);
             }
-
+        }
+        if (companyId != null) {
             Cache allReviewsCache = cacheManager.getCache("allReviews");
             if (allReviewsCache != null) {
-                allReviewsCache.clear();
+                allReviewsCache.evict(companyId);
                 log.debug("Cleared 'allReviews' cache");
             }
         }

@@ -1,9 +1,11 @@
 package com.javid.companyms.company.service.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class CacheService {
 
     private final CacheManager cacheManager;
@@ -26,7 +28,7 @@ public class CacheService {
         var cache = cacheManager.getCache(cacheName);
         if (cache != null) {
             cache.clear();
-            System.out.println("CACHE CLEARED: " + cacheName);
+            log.info("CACHE CLEARED: " + cacheName);
         }
     }
 }

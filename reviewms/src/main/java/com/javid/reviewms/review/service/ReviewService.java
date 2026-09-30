@@ -17,4 +17,5 @@ public interface ReviewService {
 
     void deleteReview(Long reviewId);
     GetAllReviewsForJobService getAllReviewsForJobService(Long companyId);
+    Double getAverageRating(Long companyId);
 }

@@ -1,8 +1,9 @@
-package com.javid.companyms.company.exception.handler;
+package com.javid.reviewms.review.exception.handler;
 
-import com.javid.companyms.company.exception.CompanyNotFoundException;
-import com.javid.companyms.company.exception.InvalidInputException;
-import com.javid.companyms.company.exception.response.ErrorResponse;
+import com.javid.reviewms.review.exception.CompanyNotFoundException;
+import com.javid.reviewms.review.exception.InvalidInputException;
+import com.javid.reviewms.review.exception.ReviewNotFoundException;
+import com.javid.reviewms.review.exception.response.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -20,7 +21,6 @@ import java.util.Map;
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
-
     @ExceptionHandler(CompanyNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleCompanyNotFoundException(
             CompanyNotFoundException ex,
@@ -32,6 +32,21 @@ public class GlobalExceptionHandler {
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.NOT_FOUND.value())
                 .error(HttpStatus.NOT_FOUND.getReasonPhrase())
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .build();
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(ReviewNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleReviewNotFoundException(ReviewNotFoundException ex, HttpServletRequest request) {
+        log.error("ReviewNotFoundException occurred: {}", ex.getMessage());
+
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .error(HttpStatus.NOT_FOUND.getReasonPhrase())
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.NOT_FOUND.value())
                 .message(ex.getMessage())
                 .path(request.getRequestURI())
                 .build();
