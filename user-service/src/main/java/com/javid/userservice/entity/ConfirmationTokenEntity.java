@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Builder
 public class ConfirmationTokenEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

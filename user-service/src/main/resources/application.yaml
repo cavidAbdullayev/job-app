@@ -1,0 +1,57 @@
+server:
+  port: 8085
+
+
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/user_service
+    username: javid
+    password: 12345
+  application:
+    name: user-service
+
+  profiles:
+    include:
+      - values
+
+  jpa:
+    database: POSTGRESQL
+    show-sql: true
+    hibernate:
+      ddl-auto: create
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: myuser
+    password: mypassword
+
+eureka:
+  client:
+    backup-registry-impl: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+  instance:
+    hostname: localhost
+    prefer-ip-address: false
+
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  health:
+    circuitbreakers:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
+

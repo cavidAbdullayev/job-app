@@ -11,7 +11,8 @@ public enum ErrorCode {
     VALIDATION_FAILED("VALIDATION_FAILED", "error.validation.failed", HttpStatus.BAD_REQUEST),
     INTERNAL_SERVER_ERROR("INTERNAL_SERVER_ERROR", "error.internal.server", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_TYPE_CONVERSION("INVALID_TYPE_CONVERSION","error.invalid.type-conversion",HttpStatus.BAD_REQUEST),
-    INVALID_INPUT("INVALID_INPUT", "error.invalid.input", HttpStatus.BAD_REQUEST);
+    INVALID_INPUT("INVALID_INPUT", "error.invalid.input", HttpStatus.BAD_REQUEST),
+    TOKEN_EXPIRED("TOKEN_EXPIRED", "error.token.expired", HttpStatus.UNAUTHORIZED);
 
 
 

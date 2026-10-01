@@ -1,0 +1,2 @@
+app:
+  confirmation-url: http://localhost:8085/external/users/confirm-registration/
