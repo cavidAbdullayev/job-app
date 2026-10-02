@@ -3,9 +3,10 @@ server:
 
 
 
+
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5433/user_service
+    url: jdbc:postgresql://localhost:5433/users
     username: javid
     password: 12345
   application:
