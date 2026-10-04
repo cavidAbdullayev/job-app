@@ -1,11 +1,10 @@
 package com.javid.userservice.event;
 
-import lombok.Builder;
-
 import java.io.Serializable;
+import java.util.UUID;
 
 public record UserRegisteredEvent(
-        String eventId,
+        UUID eventId,
         String email,
         String firstName,
         String confirmationUrl

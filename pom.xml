@@ -24,6 +24,7 @@
         <module>service-registry</module>
         <module>Config Server</module> <!-- Düzəldildi: Boşluq "config-server" ilə əvəzləndi -->
         <module>user-service</module>  <!-- Əlavə edildi: user-service modulu ekləndi -->
+        <module>email-service</module>
     </modules>
 
     <properties>

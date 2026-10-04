@@ -17,6 +17,7 @@ import com.javid.userservice.repository.ConfirmationTokenRepository;
 import com.javid.userservice.repository.OutboxRepository;
 import com.javid.userservice.repository.UserRepository;
 import com.javid.userservice.service.UserService;
+import com.javid.userservice.util.TokenUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -48,15 +49,16 @@ public class UserServiceImpl implements UserService {
     @SneakyThrows
     public String register(UserRegisterRequest request) {
         if (userRepository.existsByEmail(request.email())) {
-            throw new UserAlreadyExists(ErrorCode.USER_ALREADY_EXISTS_EMAIL, request.phone());
+            throw new UserAlreadyExists(ErrorCode.USER_ALREADY_EXISTS_EMAIL, request.email());
         }
 
         if (userRepository.existsByPhoneNumber(request.phone())) {
-            throw new UserAlreadyExists(ErrorCode.USER_ALREADY_EXISTS_PHONE_NUMBER, request.email());
+            throw new UserAlreadyExists(ErrorCode.USER_ALREADY_EXISTS_PHONE_NUMBER, request.phone());
         }
 
         UserEntity user = UserEntity.builder()
                 .email(request.email())
+                .username(request.username())
                 .password(passwordEncoder.encode(request.password()))
                 .phone(request.phone())
                 .firstName(request.firstName())
@@ -83,7 +85,7 @@ public class UserServiceImpl implements UserService {
         log.info("Confirmation token generated for user: {}, url: {}", user.getEmail(), url);
 
         UserRegisteredEvent event = new UserRegisteredEvent(
-                UUID.randomUUID().toString(),
+                UUID.randomUUID(),
                 user.getEmail(),
                 user.getFirstName(),
                 url
@@ -91,44 +93,47 @@ public class UserServiceImpl implements UserService {
 
         OutboxEntity outboxEntity = OutboxEntity.builder()
                 .aggregateType("USER")
-                        .aggregateId(user.getId().toString())
-                                .eventType("USER_REGISTERED")
-                                        .payload(objectMapper.writeValueAsString(event))
-                                                .status(OutboxStatus.PENDING)
-                                                        .build();
+                .aggregateId(user.getId().toString())
+                .eventType("USER_REGISTERED")
+                .payload(objectMapper.writeValueAsString(event))
+                .status(OutboxStatus.PENDING)
+                .build();
 
         outboxRepository.save(outboxEntity);
 
-        //TODO: send email email-service
         eventPublisher.publishEvent(new UserCreatedEvent(user.getId().toString()));
 
-        return "User registered successfully";
+        log.info("User registered and Outbox record created for email: {}", user.getEmail());
+        return "User registered successfully. Please check your email.";
     }
 
     @Override
+    @Transactional
     public String confirmRegistration(String token) {
         Optional<ConfirmationTokenEntity> confirmationTokenOpt = confirmationTokenRepository.findByToken(token);
 
         if (confirmationTokenOpt.isEmpty()) {
-            throw new TokenNotFoundException(ErrorCode.TOKEN_EXPIRED);
+            return "User registration already confirmed or invalid token";
         }
 
         ConfirmationTokenEntity confirmationToken = confirmationTokenOpt.get();
 
-        if (confirmationToken.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new TokenHasExpiredException(ErrorCode.TOKEN_EXPIRED);
-        }
+        TokenUtil.checkTokenExpired(confirmationToken);
 
         UserEntity user = confirmationToken.getUser();
+
+        if(user.isActive()){
+            return "User is already confirmed";
+        }
 
         user.setActive(true);
         user.setStatus(UserStatusEnum.USER);
 
         userRepository.save(user);
-
         confirmationTokenRepository.delete(confirmationToken);
 
         return "User confirmed successfully";
     }
+
 
 }

@@ -1,5 +1,4 @@
-package com.javid.userservice.messaging;
-
+package com.javid.reviewms.review.config;
 
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -9,12 +8,12 @@ import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-
 @Configuration
 public class RabbitMQConfig {
+
     @Bean
     public Queue companyRatingQueue(){
-        return new Queue("");
+        return new Queue("companyRatingQueue");
     }
 
     @Bean
@@ -28,4 +27,5 @@ public class RabbitMQConfig {
         rabbitTemplate.setMessageConverter(jsonMessageConverter());
         return rabbitTemplate;
     }
+
 }
