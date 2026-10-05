@@ -1,6 +1,8 @@
 package com.javid.userservice.entity;
 
 
+import com.javid.userservice.enums.AggregateType;
+import com.javid.userservice.enums.EventType;
 import com.javid.userservice.enums.OutboxStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -39,10 +41,12 @@ public class OutboxEntity {
     String aggregateId;
 
     @Column(nullable = false)
-    String aggregateType;
+    @Enumerated(EnumType.STRING)
+    AggregateType aggregateType;
 
     @Column(nullable = false)
-    String eventType;
+    @Enumerated(EnumType.STRING)
+    EventType eventType;
 
     @Column(columnDefinition = "TEXT", nullable = false)
     String payload;

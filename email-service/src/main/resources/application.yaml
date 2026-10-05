@@ -28,7 +28,7 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: cavidabdullayevv20@gmail.com
-    password: vrbo sspi vyyl atpp
+    password: vrbo sspi vyyl atpb
     properties:
       mail:
         smtp:

@@ -1,5 +1,6 @@
 package com.javid.userservice.entity;
 
+import com.javid.userservice.enums.TokenUsedForType;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -27,6 +28,10 @@ public class ConfirmationTokenEntity {
 
     @CreationTimestamp
     LocalDateTime createdAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    TokenUsedForType type;
 
     LocalDateTime confirmedAt;
 

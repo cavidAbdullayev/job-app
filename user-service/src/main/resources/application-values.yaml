@@ -1,2 +1,7 @@
 app:
   confirmation-url: http://localhost:8085/external/users/confirm-registration/
+  jwt:
+    secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970 # En az 256-bit Hex key
+    access-token-expiration-ms: 900000    # 15 deqiqe (ms)
+    refresh-token-expiration-ms: 604800000 # 7 gun (ms)
+

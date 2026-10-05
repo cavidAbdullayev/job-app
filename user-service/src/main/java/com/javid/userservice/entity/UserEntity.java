@@ -32,7 +32,7 @@ public class UserEntity {
     @Column(name = "password", nullable = false, length = 100)
     String password;
 
-    @Column(name = "email", nullable = false, unique = true, length = 50)
+    @Column(name = "email", nullable = false, length = 50)
     String email;
 
     @Column(name = "first_name", length = 25)
@@ -59,6 +59,6 @@ public class UserEntity {
     @Column(nullable = false)
     boolean isActive;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", orphanRemoval = true)
     public List<ConfirmationTokenEntity> confirmationTokens;
 }
