@@ -26,7 +26,7 @@ public class OutboxProcessorServiceImpl implements OutboxProcessorService {
     public void processSingleOutbox(OutboxEntity outbox) {
 
         try {
-            userServiceProducer.sendEmail(outbox.getEventType(), outbox.getPayload());
+            userServiceProducer.sendEmail(outbox.getEventType().name(), outbox.getPayload());
 
             outbox.setStatus(OutboxStatus.PROCESSED);
             outbox.setProcessedAt(LocalDateTime.now());

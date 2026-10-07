@@ -62,7 +62,7 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    private long getAccessTokenExpirationMs() {
+    public long getAccessTokenExpirationMs() {
         return accessTokenExpirationMs;
     }
 }

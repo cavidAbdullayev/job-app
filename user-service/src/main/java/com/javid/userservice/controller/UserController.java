@@ -1,6 +1,8 @@
 package com.javid.userservice.controller;
 
+import com.javid.userservice.dto.ConfirmationResponse;
 import com.javid.userservice.dto.UserRegisterRequest;
+import com.javid.userservice.dto.UserRegisterResponse;
 import com.javid.userservice.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +18,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@Valid @RequestBody UserRegisterRequest request) {
+    public ResponseEntity<UserRegisterResponse> register(@Valid @RequestBody UserRegisterRequest request) {
         return new ResponseEntity<>(
                 userService.register(request),
                 HttpStatus.CREATED
@@ -24,7 +26,7 @@ public class UserController {
     }
 
     @GetMapping("/confirm-registration/{token}")
-    public ResponseEntity<String> confirmRegistration(@PathVariable String token) {
+    public ResponseEntity<ConfirmationResponse> confirmRegistration(@PathVariable String token) {
         return new ResponseEntity<>(
                 userService.confirmRegistration(token),
                 HttpStatus.OK
