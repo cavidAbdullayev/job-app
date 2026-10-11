@@ -30,12 +30,19 @@ public class CompanyController {
             value = "/{id}"
     )
     public ResponseEntity<GetCompanyResponse> updateCompany(@RequestBody @Valid UpdateCompanyRequest updatedCompany,
-                                                            @PathVariable Long id) {
+                                                            @PathVariable Long id,
+                                                            @RequestHeader(value = "X-User-Id", required = false) String userId) {
+        // İstəsəniz userId-ni service qatına ötürüb "bu şirkəti kim yenilədi" loglaya və ya yoxlaya bilərsiniz
         return ResponseEntity.ok(companyService.updateCompany(updatedCompany, id));
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<GetCompanyResponse> createCompany(@RequestBody @Valid CreateCompanyRequest companyRequest) {
+    public ResponseEntity<GetCompanyResponse> createCompany(@RequestBody @Valid CreateCompanyRequest companyRequest,
+                                                            @RequestHeader("X-User-Id") String userId,
+                                                            @RequestHeader("X-User-Email") String userEmail) {
+
+        System.out.println("Company created by User ID: " + userId + ", Email: " + userEmail);
+
         return ResponseEntity.ok(companyService.createCompany(companyRequest));
     }
 
@@ -43,7 +50,8 @@ public class CompanyController {
             method = RequestMethod.DELETE,
             value = "/{id}"
     )
-    public ResponseEntity<Void> deleteCompanyById(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteCompanyById(@PathVariable Long id,
+                                                  @RequestHeader(value = "X-User-Id", required = false) String userId) {
         companyService.deleteCompanyById(id);
         return ResponseEntity.noContent().build();
     }

@@ -1,6 +1,11 @@
 server:
   port: 8084
 
+app:
+  jwt:
+    secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+
+
 spring:
   application:
     name: gateway
@@ -19,6 +24,7 @@ spring:
           predicates:
             - Path=/external/companies/**
           filters:
+            - name: AuthenticationFilter
             - name: RequestRateLimiter
               args:
                 redis-rate-limiter.replenishRate: 10
@@ -31,6 +37,7 @@ spring:
           predicates:
             - Path=/jobs/**
           filters:
+            - name: AuthenticationFilter
             - name: RequestRateLimiter
               args:
                 redis-rate-limiter.replenishRate: 10
@@ -42,6 +49,7 @@ spring:
           predicates:
             - Path=/external/reviews/**
           filters:
+            - name: AuthenticationFilter
             - name: RequestRateLimiter
               args:
                 redis-rate-limiter.replenishRate: 10
@@ -63,8 +71,9 @@ spring:
         - id: user_service
           uri: lb://USER-SERVICE
           predicates:
-            - Path=/external/users/**
+            - Path=/external/users/**, /external/auth/**
           filters:
+            - name: AuthenticationFilter
             - name: RequestRateLimiter
               args:
                 redis-rate-limiter.replenishRate: 10

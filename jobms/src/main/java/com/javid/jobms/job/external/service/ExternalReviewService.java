@@ -27,7 +27,7 @@ public class ExternalReviewService {
         return (response != null && response.getBody() != null) ? response.getBody() : GetAllReviewsForJobService.builder().reviews(Collections.emptyList()).build();
     }
 
-    public List<GetAllReviewsForJobService> reviewBreakerFallback(Long companyId, Exception e) {
+    public GetAllReviewsForJobService reviewBreakerFallback(Long companyId, Exception e) {
         log.error("Review service çağırışı uğursuz oldu (Company ID: {}): {}", companyId, e.getMessage());
         GetAllReviewsForJobService review = GetAllReviewsForJobService.builder()
                 .reviews(
@@ -37,6 +37,6 @@ public class ExternalReviewService {
                                         .build())
                 )
                 .build();
-        return List.of(review);
+        return review;
     }
 }
