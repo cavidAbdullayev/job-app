@@ -31,6 +31,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/external/admin/**").hasRole("ADMIN")
                         .requestMatchers(
                                 "/external/users/register",
                                 "/external/users/confirm-registration/**",

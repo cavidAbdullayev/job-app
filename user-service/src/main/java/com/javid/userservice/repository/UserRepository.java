@@ -6,8 +6,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
+import java.util.UUID;
 
-public interface UserRepository extends JpaRepository<UserEntity, Long> {
+public interface UserRepository extends JpaRepository<UserEntity, UUID> {
 
     @Query("""
             select case when count(u) > 0 then true else false end

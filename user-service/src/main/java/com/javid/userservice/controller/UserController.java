@@ -1,8 +1,6 @@
 package com.javid.userservice.controller;
 
-import com.javid.userservice.dto.ConfirmationResponse;
-import com.javid.userservice.dto.UserRegisterRequest;
-import com.javid.userservice.dto.UserRegisterResponse;
+import com.javid.userservice.dto.*;
 import com.javid.userservice.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,5 +29,14 @@ public class UserController {
                 userService.confirmRegistration(token),
                 HttpStatus.OK
         );
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<UpdateUserResponse> updateUser(
+            @RequestHeader("Authorization") String authHeader,
+            @RequestBody UpdateUserRequest request
+    ) {
+        String token = authHeader.substring(7);
+        return ResponseEntity.ok(userService.updateUser(token, request));
     }
 }

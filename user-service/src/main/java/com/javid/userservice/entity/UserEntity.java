@@ -1,5 +1,6 @@
 package com.javid.userservice.entity;
 
+import com.javid.userservice.enums.Role;
 import com.javid.userservice.enums.UserStatusEnum;
 import jakarta.persistence.*;
 import lombok.*;
@@ -9,6 +10,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -61,4 +63,8 @@ public class UserEntity {
 
     @OneToMany(mappedBy = "user", orphanRemoval = true)
     public List<ConfirmationTokenEntity> confirmationTokens;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Enumerated(EnumType.STRING)
+    private Set<Role> roles;
 }

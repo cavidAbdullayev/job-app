@@ -1,9 +1,7 @@
 package com.javid.userservice.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.javid.userservice.dto.ConfirmationResponse;
-import com.javid.userservice.dto.UserRegisterRequest;
-import com.javid.userservice.dto.UserRegisterResponse;
+import com.javid.userservice.dto.*;
 import com.javid.userservice.entity.ConfirmationTokenEntity;
 import com.javid.userservice.entity.OutboxEntity;
 import com.javid.userservice.entity.UserEntity;
@@ -11,11 +9,14 @@ import com.javid.userservice.enums.*;
 import com.javid.userservice.event.UserCreatedEvent;
 import com.javid.userservice.event.UserRegisteredEvent;
 import com.javid.userservice.exceptions.UserAlreadyExistsException;
+import com.javid.userservice.mapper.UserMapper;
 import com.javid.userservice.repository.ConfirmationTokenRepository;
 import com.javid.userservice.repository.OutboxRepository;
 import com.javid.userservice.repository.UserRepository;
 import com.javid.userservice.service.UserService;
+import com.javid.userservice.util.JwtUtil;
 import com.javid.userservice.util.TokenUtil;
+import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -40,6 +42,9 @@ public class UserServiceImpl implements UserService {
     private final ApplicationEventPublisher eventPublisher;
     private final OutboxRepository outboxRepository;
     private final ObjectMapper objectMapper;
+    private final JwtUtil jwtUtil;
+    private final UserMapper userMapper;
+
     @Value("${app.confirmation-url}")
     private String CONFIRM_REGISTRATION_URL;
 
@@ -70,7 +75,6 @@ public class UserServiceImpl implements UserService {
         boolean isSameUser = pendingEmailUser.isPresent()
                 && pendingPhoneUser.isPresent()
                 && Objects.equals(pendingPhoneUser.get().getId(), pendingEmailUser.get().getId());
-
 
         if (isSameUser || (pendingPhoneUser.isPresent() ^ pendingEmailUser.isPresent())) {
             user = pendingEmailUser.orElseGet(pendingPhoneUser::get);
@@ -145,7 +149,11 @@ public class UserServiceImpl implements UserService {
 
         ConfirmationTokenEntity confirmationToken = confirmationTokenOpt.get();
 
+        log.info("Confirmation token accessed: {}", confirmationToken.getToken());
+
         TokenUtil.checkTokenExpired(confirmationToken);
+
+        log.info("Confirmation token checked successfully");
 
         UserEntity user = confirmationToken.getUser();
 
@@ -159,7 +167,10 @@ public class UserServiceImpl implements UserService {
         user.setStatus(UserStatusEnum.USER);
 
         userRepository.save(user);
+        log.info("User saved successfully: {}", user.getUsername());
+
         confirmationTokenRepository.delete(confirmationToken);
+        log.info("Confirmation token deleted");
 
         return ConfirmationResponse.builder()
                 .message("User confirmed successfully")
@@ -169,6 +180,40 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 
+    @Override
+    public UpdateUserResponse updateUser(String token, UpdateUserRequest request) {
+        String userId = (String) jwtUtil.extractAllClaims(token).get("userId");
+        log.info("User ID parsed from token - {}", userId);
+
+        UserEntity user = userRepository.findById(UUID.fromString(userId))
+                .orElseThrow(() -> new NotFoundException("User given by ID - " + userId + " not found"));
+        log.info("User retrieved with ID - {}", userId);
+
+        if (request.phone() != null && !request.phone().isBlank() && !request.phone().equals(user.getPhone())) {
+            if (userRepository.existsByPhoneNumberAndIsActiveTrue(request.phone())) {
+                throw new UserAlreadyExistsException(ErrorCode.USER_ALREADY_EXISTS_PHONE_NUMBER, request.phone());
+            }
+
+            Optional<UserEntity> pendingPhoneUser = userRepository.findByPhone(request.phone());
+            if (pendingPhoneUser.isPresent()) {
+                UserEntity targetUser = pendingPhoneUser.get();
+                if (hasActiveToken(targetUser)) {
+                    throw new UserAlreadyExistsException(ErrorCode.PENDING_REGISTRATION_EXISTS, "", request.phone());
+                }
+            }
+
+            log.info("User checked successfully with phone - {}", request.phone());
+        }
+        userMapper.mapForUpdate(request, user);
+
+        userRepository.save(user);
+
+        return UpdateUserResponse.builder()
+                .phone(user.getPhone())
+                .lastName(user.getLastName())
+                .firstName(user.getFirstName())
+                .build();
+    }
 
     private boolean hasActiveToken(UserEntity user) {
         if (user.getConfirmationTokens() == null || user.getConfirmationTokens().isEmpty()) {
@@ -187,6 +232,10 @@ public class UserServiceImpl implements UserService {
         user.setPhone(request.phone());
         user.setFirstName(request.firstName());
         user.setLastName(request.lastName());
+
+        if (user.getRoles() == null || user.getRoles().isEmpty()) {
+            user.setRoles(Set.of(Role.ROLE_USER));
+        }
 
         if (user.getConfirmationTokens() != null) {
             user.getConfirmationTokens().removeIf(token -> token.getType() == TokenUsedForType.REGISTRATION);
@@ -207,6 +256,7 @@ public class UserServiceImpl implements UserService {
                 .lastName(request.lastName())
                 .status(UserStatusEnum.PENDING)
                 .isActive(false)
+                .roles(Set.of(Role.ROLE_USER))
                 .build();
     }
 }
